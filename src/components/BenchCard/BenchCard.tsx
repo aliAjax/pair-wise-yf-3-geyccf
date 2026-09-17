@@ -3,6 +3,7 @@ import { MapPin, Clock, Volume2, Sun, Armchair } from 'lucide-react';
 import type { Bench } from '@/types';
 import { MATERIAL_LABELS, SHADE_LABELS, NOISE_LABELS, STAY_DURATION_LABELS } from '@/types';
 import Rating from '@/components/Rating/Rating';
+import CompareButton from '@/components/CompareButton/CompareButton';
 import { calculateComfortScore, getComfortLevel, getComfortColor } from '@/utils/comfort';
 
 interface BenchCardProps {
@@ -66,11 +67,14 @@ export default function BenchCard({ bench, index = 0 }: BenchCardProps) {
           )}
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <Rating value={bench.rating} readOnly size="sm" />
-          <div className="flex items-center gap-1 text-xs text-ink-light">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{STAY_DURATION_LABELS[bench.stayDuration]}</span>
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1 text-xs text-ink-light">
+              <Clock className="w-3.5 h-3.5" />
+              <span>{STAY_DURATION_LABELS[bench.stayDuration]}</span>
+            </div>
+            <CompareButton benchId={bench.id} variant="card" />
           </div>
         </div>
       </div>

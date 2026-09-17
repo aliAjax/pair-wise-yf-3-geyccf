@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from '@/components/Layout/Navbar';
+import CompareTray from '@/components/CompareTray/CompareTray';
 import ListPage from '@/pages/ListPage/ListPage';
 import MapPage from '@/pages/MapPage/MapPage';
 import RankingPage from '@/pages/RankingPage/RankingPage';
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/add" element={<AddEditPage />} />
             <Route path="/edit/:id" element={<AddEditPage />} />
           </Routes>
+          <CompareTray />
         </main>
       </div>
     </Router>

@@ -1,6 +1,6 @@
 import type { Bench, MaterialType, ShadeLevelType, NoiseLevelType } from '@/types';
 
-const materialScores: Record<MaterialType, number> = {
+export const materialScores: Record<MaterialType, number> = {
   wood: 5,
   mixed: 4,
   stone: 3,
@@ -8,23 +8,39 @@ const materialScores: Record<MaterialType, number> = {
   plastic: 2,
 };
 
-const shadeScores: Record<ShadeLevelType, number> = {
+export const shadeScores: Record<ShadeLevelType, number> = {
   full: 5,
   partial: 3,
   none: 1,
 };
 
-const noiseScores: Record<NoiseLevelType, number> = {
+export const noiseScores: Record<NoiseLevelType, number> = {
   quiet: 5,
   moderate: 3,
   noisy: 1,
 };
 
+export function getBackrestScore(bench: Pick<Bench, 'hasBackrest'>): number {
+  return bench.hasBackrest ? 5 : 2;
+}
+
+export function getShadeScore(bench: Pick<Bench, 'shadeLevel'>): number {
+  return shadeScores[bench.shadeLevel];
+}
+
+export function getNoiseScore(bench: Pick<Bench, 'noiseLevel'>): number {
+  return noiseScores[bench.noiseLevel];
+}
+
+export function getMaterialScore(bench: Pick<Bench, 'material'>): number {
+  return materialScores[bench.material];
+}
+
 export function calculateComfortScore(bench: Bench): number {
-  const backrestScore = bench.hasBackrest ? 5 : 2;
-  const shadeScore = shadeScores[bench.shadeLevel];
-  const noiseScore = noiseScores[bench.noiseLevel];
-  const materialScore = materialScores[bench.material];
+  const backrestScore = getBackrestScore(bench);
+  const shadeScore = getShadeScore(bench);
+  const noiseScore = getNoiseScore(bench);
+  const materialScore = getMaterialScore(bench);
   const userRating = bench.rating;
 
   const comfort = backrestScore * 0.2 + shadeScore * 0.2 + noiseScore * 0.2 + materialScore * 0.15 + userRating * 0.25;

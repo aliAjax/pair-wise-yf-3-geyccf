@@ -26,6 +26,7 @@ import {
 } from '@/types';
 import type { TimePeriodType } from '@/types';
 import Rating from '@/components/Rating/Rating';
+import CompareButton from '@/components/CompareButton/CompareButton';
 import { calculateComfortScore, getComfortLevel, getComfortColor } from '@/utils/comfort';
 
 export default function BenchDetail() {
@@ -193,6 +194,8 @@ export default function BenchDetail() {
                 </div>
 
                 <div className="flex-1" />
+
+                <CompareButton benchId={bench.id} variant="detail" />
 
                 <button
                   onClick={() => navigate(`/edit/${bench.id}`)}

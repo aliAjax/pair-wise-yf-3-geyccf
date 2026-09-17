@@ -29,3 +29,31 @@ export function clearBenches(): void {
     console.error('Failed to clear benches from localStorage:', error);
   }
 }
+
+const COMPARE_STORAGE_KEY = 'bench-compare-ids';
+const COMPARE_MAX_ITEMS = 4;
+
+export function loadCompareIds(): string[] {
+  try {
+    const data = localStorage.getItem(COMPARE_STORAGE_KEY);
+    if (data) {
+      const parsed: unknown = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .filter((id): id is string => typeof id === 'string')
+          .slice(0, COMPARE_MAX_ITEMS);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load compare ids from localStorage:', error);
+  }
+  return [];
+}
+
+export function saveCompareIds(ids: string[]): void {
+  try {
+    localStorage.setItem(COMPARE_STORAGE_KEY, JSON.stringify(ids));
+  } catch (error) {
+    console.error('Failed to save compare ids to localStorage:', error);
+  }
+}

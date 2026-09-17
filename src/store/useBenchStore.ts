@@ -3,6 +3,7 @@ import type { Bench, BenchExperience, MaterialType, OrientationType, ShadeLevelT
 import { loadBenches, saveBenches } from '@/utils/storage';
 import { generateId } from '@/utils/comfort';
 import { mockBenches } from '@/data/mockBenches';
+import { useCompareStore } from '@/store/useCompareStore';
 
 interface BenchState {
   benches: Bench[];
@@ -53,6 +54,9 @@ export const useBenchStore = create<BenchState & BenchActions>((set, get) => ({
       set({ benches: mockBenches, initialized: true });
       saveBenches(mockBenches);
     }
+    useCompareStore.getState().pruneMissing(
+      useBenchStore.getState().benches.map((bench) => bench.id)
+    );
   },
 
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -97,6 +101,7 @@ export const useBenchStore = create<BenchState & BenchActions>((set, get) => ({
     const newBenches = get().benches.filter((bench) => bench.id !== id);
     set({ benches: newBenches });
     saveBenches(newBenches);
+    useCompareStore.getState().removeCompare(id);
   },
 
   getBenchById: (id) => {
