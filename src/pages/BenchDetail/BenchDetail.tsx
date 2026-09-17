@@ -10,12 +10,13 @@ import {
   Compass,
   Edit3,
   Trash2,
+  Scale,
   Sunrise,
   Sunset,
   Moon,
   CloudSun,
 } from 'lucide-react';
-import { useBenchStore } from '@/store/useBenchStore';
+import { useBenchStore, MAX_COMPARE } from '@/store/useBenchStore';
 import {
   MATERIAL_LABELS,
   ORIENTATION_LABELS,
@@ -31,7 +32,7 @@ import { calculateComfortScore, getComfortLevel, getComfortColor } from '@/utils
 export default function BenchDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getBenchById, deleteBench, initialize, initialized } = useBenchStore();
+  const { getBenchById, deleteBench, initialize, initialized, compareIds, toggleCompare } = useBenchStore();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
@@ -61,6 +62,9 @@ export default function BenchDetail() {
   const comfortScore = calculateComfortScore(bench);
   const comfortLevel = getComfortLevel(comfortScore);
   const comfortColor = getComfortColor(comfortScore);
+
+  const inCompare = compareIds.includes(bench.id);
+  const compareDisabled = !inCompare && compareIds.length >= MAX_COMPARE;
 
   const timePeriodIcons: Record<TimePeriodType, typeof Sunrise> = {
     morning: Sunrise,
@@ -194,6 +198,24 @@ export default function BenchDetail() {
 
                 <div className="flex-1" />
 
+                <button
+                  onClick={() => {
+                    if (!compareDisabled) {
+                      toggleCompare(bench.id);
+                    }
+                  }}
+                  title={compareDisabled ? '对照台已满（最多4项）' : undefined}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                    inCompare
+                      ? 'text-white bg-moss-green hover:bg-moss-light'
+                      : compareDisabled
+                        ? 'text-ink-light/40 cursor-not-allowed'
+                        : 'text-moss-green hover:bg-moss-green/10'
+                  }`}
+                >
+                  <Scale className="w-4 h-4" />
+                  {inCompare ? '移出对照' : '收入对照'}
+                </button>
                 <button
                   onClick={() => navigate(`/edit/${bench.id}`)}
                   className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-moss-green hover:bg-moss-green/10 rounded-lg transition-colors"

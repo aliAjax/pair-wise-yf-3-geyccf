@@ -1,11 +1,14 @@
 import { create } from 'zustand';
 import type { Bench, BenchExperience, MaterialType, OrientationType, ShadeLevelType, NoiseLevelType, StayDurationType } from '@/types';
-import { loadBenches, saveBenches } from '@/utils/storage';
+import { loadBenches, saveBenches, loadCompareIds, saveCompareIds } from '@/utils/storage';
 import { generateId } from '@/utils/comfort';
 import { mockBenches } from '@/data/mockBenches';
 
+export const MAX_COMPARE = 4;
+
 interface BenchState {
   benches: Bench[];
+  compareIds: string[];
   searchQuery: string;
   materialFilter: MaterialType | null;
   orientationFilter: OrientationType | null;
@@ -30,10 +33,15 @@ interface BenchActions {
   updateExperience: (benchId: string, expId: string, updates: Partial<BenchExperience>) => void;
   deleteExperience: (benchId: string, expId: string) => void;
   getFilteredBenches: () => Bench[];
+  addToCompare: (id: string) => void;
+  removeFromCompare: (id: string) => void;
+  toggleCompare: (id: string) => void;
+  clearCompare: () => void;
 }
 
 const initialState: BenchState = {
   benches: [],
+  compareIds: [],
   searchQuery: '',
   materialFilter: null,
   orientationFilter: null,
@@ -47,12 +55,16 @@ export const useBenchStore = create<BenchState & BenchActions>((set, get) => ({
 
   initialize: () => {
     const stored = loadBenches();
-    if (stored.length > 0) {
-      set({ benches: stored, initialized: true });
-    } else {
-      set({ benches: mockBenches, initialized: true });
+    const benches = stored.length > 0 ? stored : mockBenches;
+    if (stored.length === 0) {
       saveBenches(mockBenches);
     }
+    // 清理对照台中已不存在的长椅
+    const compareIds = loadCompareIds().filter((id) =>
+      benches.some((bench) => bench.id === id)
+    );
+    saveCompareIds(compareIds);
+    set({ benches, compareIds, initialized: true });
   },
 
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -95,8 +107,10 @@ export const useBenchStore = create<BenchState & BenchActions>((set, get) => ({
 
   deleteBench: (id) => {
     const newBenches = get().benches.filter((bench) => bench.id !== id);
-    set({ benches: newBenches });
+    const newCompareIds = get().compareIds.filter((compareId) => compareId !== id);
+    set({ benches: newBenches, compareIds: newCompareIds });
     saveBenches(newBenches);
+    saveCompareIds(newCompareIds);
   },
 
   getBenchById: (id) => {
@@ -171,5 +185,33 @@ export const useBenchStore = create<BenchState & BenchActions>((set, get) => ({
       
       return true;
     });
+  },
+
+  addToCompare: (id) => {
+    const { compareIds, benches } = get();
+    if (compareIds.includes(id) || compareIds.length >= MAX_COMPARE) return;
+    if (!benches.some((bench) => bench.id === id)) return;
+    const newCompareIds = [...compareIds, id];
+    set({ compareIds: newCompareIds });
+    saveCompareIds(newCompareIds);
+  },
+
+  removeFromCompare: (id) => {
+    const newCompareIds = get().compareIds.filter((compareId) => compareId !== id);
+    set({ compareIds: newCompareIds });
+    saveCompareIds(newCompareIds);
+  },
+
+  toggleCompare: (id) => {
+    if (get().compareIds.includes(id)) {
+      get().removeFromCompare(id);
+    } else {
+      get().addToCompare(id);
+    }
+  },
+
+  clearCompare: () => {
+    set({ compareIds: [] });
+    saveCompareIds([]);
   },
 }));
